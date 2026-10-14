@@ -1,4 +1,4 @@
-module lzk-go-lib
+module github.com/LzKelvinSoares/lzk-go-lib
 
 go 1.27.1
 
