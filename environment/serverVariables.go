@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -10,6 +11,10 @@ import (
 type ServerVariables struct {
 	Address string
 	Port    string
+}
+
+func (s ServerVariables) GetAddressToServe() string {
+	return fmt.Sprintf("%s:%s", s.Address, s.Port)
 }
 
 func GetServerVariables() ServerVariables {
