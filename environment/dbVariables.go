@@ -3,6 +3,10 @@ package environment
 import (
 	"fmt"
 	"os"
+
+	"github.com/LzKelvinSoares/lzk-go-lib/constants"
+	"github.com/LzKelvinSoares/lzk-go-lib/errs"
+	"github.com/LzKelvinSoares/lzk-go-lib/logger"
 )
 
 type DBVariables struct {
@@ -31,6 +35,18 @@ func (d DBVariables) GetSQLServerDataSource() string {
 		d.Port,
 		d.Name)
 	return dataSource
+}
+
+func (d DBVariables) GetDataSource(dbType constants.DBType) (string, *errs.AppError) {
+	switch dbType {
+	case constants.MySQL:
+		return d.GetMySQLDataSource(), nil
+	case constants.SQLServer:
+		return d.GetSQLServerDataSource(), nil
+	default:
+		logger.Error("DB Type not implemented!")
+		return "", errs.NewUnexpectedError("DB Type not implemented!")
+	}
 }
 
 func GetDBVariables() DBVariables {
