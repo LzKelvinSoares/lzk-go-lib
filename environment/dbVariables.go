@@ -13,11 +13,21 @@ type DBVariables struct {
 	Name     string
 }
 
-func (d DBVariables) GetDataSource() string {
+func (d DBVariables) GetMySQLDataSource() string {
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
 		d.Username,
 		d.Password,
 		d.Address,
+		d.Port,
+		d.Name)
+	return dataSource
+}
+
+func (d DBVariables) GetSQLServerDataSource() string {
+	dataSource := fmt.Sprintf("server=%s;user id=%s;password=%s;port=%s;database=%s;encrypt=true",
+		d.Address,
+		d.Username,
+		d.Password,
 		d.Port,
 		d.Name)
 	return dataSource
