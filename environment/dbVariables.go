@@ -2,11 +2,15 @@ package environment
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/LzKelvinSoares/lzk-go-lib/constants"
 	"github.com/LzKelvinSoares/lzk-go-lib/errs"
 	"github.com/LzKelvinSoares/lzk-go-lib/logger"
+	"github.com/jmoiron/sqlx"
 )
 
 type DBVariables struct {
@@ -47,6 +51,26 @@ func (d DBVariables) GetDataSource(dbType constants.DBType) (string, *errs.AppEr
 		logger.Error("DB Type not implemented!")
 		return "", errs.NewUnexpectedError("DB Type not implemented!")
 	}
+}
+
+func GetDBClient(dbType constants.DBType) *sqlx.DB {
+	dbVariables := GetDBVariables()
+	dataSource, dbErr := dbVariables.GetDataSource(dbType)
+	if dbErr != nil {
+		log.Fatal("open: ", dbErr)
+		panic(dbErr)
+	}
+
+	client, err := sqlx.Open(strings.ToLower(string(dbType)), dataSource)
+	if err != nil {
+		log.Fatal("open: ", err)
+		panic(err)
+	}
+
+	client.SetConnMaxLifetime(5 * time.Minute)
+	client.SetMaxOpenConns(10)
+	client.SetMaxIdleConns(5)
+	return client
 }
 
 func GetDBVariables() DBVariables {
