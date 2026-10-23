@@ -11,6 +11,8 @@ import (
 	"github.com/LzKelvinSoares/lzk-go-lib/errs"
 	"github.com/LzKelvinSoares/lzk-go-lib/logger"
 	"github.com/jmoiron/sqlx"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type DBVariables struct {
@@ -41,19 +43,38 @@ func (d DBVariables) GetSQLServerDataSource() string {
 	return dataSource
 }
 
+func (d DBVariables) GetMongoDBDataSource() string {
+	dataSource := fmt.Sprintf("mongodb+srv://%s:%s@%s",
+		d.Username,
+		d.Password,
+		d.Address)
+	return dataSource
+}
+
+func (d DBVariables) GetCosmosDBDataSource() string {
+	dataSource := fmt.Sprintf(
+		"mongodb://%s:%s@%s.documents.azure.com:10255/?ssl=true",
+		d.Username,
+		d.Password,
+		d.Address)
+	return dataSource
+}
+
 func (d DBVariables) GetDataSource(dbType constants.DBType) (string, *errs.AppError) {
 	switch dbType {
 	case constants.MySQL:
 		return d.GetMySQLDataSource(), nil
 	case constants.SQLServer:
 		return d.GetSQLServerDataSource(), nil
+	case constants.MongoDB:
+		return d.GetMongoDBDataSource(), nil
 	default:
 		logger.Error("DB Type not implemented!")
 		return "", errs.NewUnexpectedError("DB Type not implemented!")
 	}
 }
 
-func GetDBClient(dbType constants.DBType) *sqlx.DB {
+func GetSQLClient(dbType constants.DBType) *sqlx.DB {
 	dbVariables := GetDBVariables()
 	dataSource, dbErr := dbVariables.GetDataSource(dbType)
 	if dbErr != nil {
@@ -70,6 +91,24 @@ func GetDBClient(dbType constants.DBType) *sqlx.DB {
 	client.SetConnMaxLifetime(5 * time.Minute)
 	client.SetMaxOpenConns(10)
 	client.SetMaxIdleConns(5)
+	return client
+}
+
+func GetNoSQLClient(dbType constants.DBType) *mongo.Client {
+	dbVariables := GetDBVariables()
+	dataSource, dbErr := dbVariables.GetDataSource(dbType)
+	if dbErr != nil {
+		log.Fatal("open: ", dbErr)
+		panic(dbErr)
+	}
+	opts := options.Client().ApplyURI(dataSource)
+
+	client, err := mongo.Connect(opts)
+	if err != nil {
+		log.Fatal("open: ", err)
+		panic(err)
+	}
+
 	return client
 }
 

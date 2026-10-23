@@ -5,4 +5,6 @@ type DBType string
 const (
 	MySQL     DBType = "MySQL"
 	SQLServer DBType = "SQLServer"
+	CosmosDB  DBType = "Cosmos"
+	MongoDB   DBType = "Mongo"
 )
