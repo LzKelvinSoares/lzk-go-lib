@@ -45,7 +45,7 @@ func (d DBVariables) GetSQLServerDataSource() string {
 }
 
 func (d DBVariables) GetMongoDBDataSource() string {
-	dataSource := fmt.Sprintf("mongodb+srv://%s:%s@%s",
+	dataSource := fmt.Sprintf("mongodb+srv://%s:%s@%s/",
 		d.Username,
 		d.Password,
 		d.Address)
