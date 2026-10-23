@@ -1,6 +1,7 @@
 package environment
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -108,6 +109,15 @@ func GetNoSQLClient(dbType constants.DBType) *mongo.Client {
 		log.Fatal("open: ", err)
 		panic(err)
 	}
+
+	// 2. Fechar a conexão ao final
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := client.Disconnect(ctx); err != nil {
+			log.Println("erro ao desconectar:", err)
+		}
+	}()
 
 	return client
 }
